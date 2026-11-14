@@ -1,64 +1,63 @@
-# Chronicle VTT — v0.1
+# Chronicle VTT — v0.2
 
-An original, 5e-compatible virtual tabletop foundation. Designed for an open Whoniverse campaign, with setting content separated from the core application.
+**Private 5e-compatible homebrew tabletop platform.** Intended for an original campaign with optional Whoniverse homebrew. Rules content is campaign-scoped and separate from the engine.
 
-## What works in v0.1
+## Working features
 
-- Supabase email/password registration and sign-in
-- A campaign dashboard with create and join flows
-- Private, random invite codes visible only to the DM
-- Membership and role-aware campaign pages
-- Character creation, listing, editing and deletion
-- Database-level RLS and an invitation-code join function
-- Responsive dark UI
+### v0.1 foundations (preserved)
+- Email/password signup, sign-in, sign-out using Supabase Auth.
+- DM creates a campaign, receives a private invitation code; players join via code.
+- Campaign membership and role-aware UI with database RLS.
+- Simple character creation, ownership, HP, level, notes and roster.
 
-This is the **foundation**, not yet a complete tabletop. The homebrew builder, dice engine, interactive maps, combat automation and regeneration are scheduled for later versions.
+### v0.2 homebrew engine
+- DM-only editor for **species**, **classes**, **backgrounds** and **features**.
+- Draft/private versus published/player-visible rule entries.
+- Species: creature type, size, movement speed, languages and narrative description.
+- Classes: hit die, primary abilities, proficiencies, equipment, and level-based feature grants.
+- Backgrounds: proficiencies, equipment, and feature grants.
+- Features: description, activation, uses, recharge, prerequisites and structured numeric modifiers.
+- Linked features unlocked by character level; publish linked features as well to expose them to players.
+- Character builder offers published campaign definitions, automatically associates selected rule IDs, and previews unlocked traits/stat bonuses.
+- Existing v0.1 free-text species/classes are preserved and remain editable.
+- Server-side guards enforce campaign boundaries, published selections and appropriate linking; DMs edit rules and players only read published rules.
 
-Repository: `ONSoftware-Websites/CVTT` · Planned domain: `https://cvtt.onsoftware.uk`
+**Intentional limits:** The v0.2 derived bonuses are previews, not yet automatic combat/HP or ability-score updates. The full 5e ability and dice engine remains for v0.3, maps v0.4, encounters v0.5, Whoniverse temporal/regeneration mechanics v0.6.
 
-For project-specific Vercel and Supabase setup instructions, see **[DEPLOYMENT.md](./DEPLOYMENT.md)**.
+## Tech stack
+
+- Vite + React 19 + TypeScript, Supabase Auth/PostgreSQL, browser-based UI.
+- The static site is deployed from `ONSoftware-Websites/CVTT` to Vercel (`https://cvtt.onsoftware.uk`).
+- Browser variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (no secret/service-role key).
 
 ## Setup
 
-1. Install Node.js 22.12+ (Vite 8 requires a modern Node.js runtime).
-2. Create a **separate Supabase project**. Do not install the schema into an unrelated production project.
-3. Open the Supabase SQL editor and run `supabase/migrations/20261114000100_foundations.sql` once, or use the Supabase CLI migrations workflow.
-4. In Supabase Auth settings, enable Email authentication and configure the site/redirect URLs. Leave email confirmation enabled for production.
-5. Copy `.env.example` to `.env.local` and fill in the new project's URL and **publishable** API key. Never put a service-role/secret key in VITE_ environment variables.
-6. Run `npm install` (which generates `package-lock.json`), commit the lockfile, then run `npm run dev` and open the local URL printed by Vite.
-7. Run `npm run build` before deployment.
+1. Node.js 22.12+; `npm install`; use `npm run build` or `npm run dev`.
+2. Use a **dedicated** Supabase project; do not modify unrelated business projects.
+3. Apply migrations **in order**, once, to a fresh project:
+   - `supabase/migrations/20261114000100_foundations.sql`
+   - `supabase/migrations/20261114000200_fix_campaign_owner_visibility.sql`
+   - `supabase/migrations/20261114000300_homebrew_engine.sql`
+4. If v0.1 is already installed, apply **only** migration `20261114000300_homebrew_engine.sql`.
+5. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in Vercel; the new schema adds no environment variables.
+6. Keep schema `private` unexposed in the Data API. Keep Supabase Auth email verification enabled for production.
 
-Do not enable the `private` schema in the Supabase Data API exposed schemas setting.
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for full production checklist and security expectations.
 
-### Hosting
+## v0.2 acceptance tests
 
-The frontend is a static Vite SPA suitable for Vercel or another static host. If deploying on Vercel, configure the same `VITE_` variables on the project and route SPA paths to `/index.html` (not necessary for this version's single-page app). The Vercel Hobby plan is for personal, non-commercial use only.
+1. Sign in as the DM, open a campaign, navigate to **Homebrew Library**.
+2. Create a **Feature** (e.g. `Binary Vascular System`) with rules description; save as **Published**.
+3. Create a **Species** (e.g. `Gallifreyan`), configure type, speed, languages; link the Feature at level 1 and **Publish** the species.
+4. Create a **Class** with Hit Die and an ability at level 3. Create a **Background** with proficiencies.
+5. Create a character and choose published species, class and background. Confirm level 1 features show, level 3 class features stay locked until level 3.
+6. Refresh the page and ensure the selected rule IDs and details persist.
+7. Sign in as a player: confirm published entries are visible, drafts and editing controls aren't available, and published options appear in character creation.
+8. Confirm players cannot modify or remove other users' characters or custom rule entries.
+9. Confirm you can still edit a v0.1 character which has no linked rule IDs, using the manual/free-text option.
 
-### Test checklist
+## Security and licensing
 
-- Create an account and confirm email.
-- Create a campaign as DM; verify invite code appears only to the DM.
-- Sign in as a second account and join using the invite code.
-- Verify the second account cannot modify the campaign's owner or another account's character through database API requests.
-- Verify nonmembers cannot read campaign records, rosters or characters.
-- Create and edit a character; verify values persist after refresh.
+RLS is enabled on all public tables. The server verifies that linked features and selected character options belong to the same campaign and have appropriate kinds. SQL migrations avoid replacing character data. Homebrew content remains private to campaigns unless the DM publishes it to that campaign's players.
 
-## Proposed development roadmap
-
-- v0.2: content editor for species, classes, backgrounds, features
-- v0.3: dice, checks, saving throws, inventories, progression
-- v0.4: interactive maps, token permissions and realtime synchronisation
-- v0.5: initiative, encounters and basic combat
-- v0.6: regeneration, temporal mechanics, technology and Whoniverse content
-
-## Security notes
-
-Campaign invitations contain 80 bits of random UUID-derived entropy. Only authenticated users may join. Membership and ownership permissions are enforced with RLS. The `private` security-definer helpers are deliberately outside exposed API schemas. Production deployment should add rate limiting, audit logging and automated permission tests as the platform expands.
-
-## Licensing/content
-
-Keep Whoniverse-specific content private unless appropriately licensed. Do not copy proprietary rules text or artwork into a publicly distributed platform; rely on permitted SRD material and original homebrew.
-
-### Verification status
-
-The source and SQL files were generated and statically checked. End-to-end application testing and database RLS tests require a dedicated configured Supabase project and successful installation of npm dependencies. Do not treat this release as production tested until the test checklist has passed.
+No proprietary Doctor Who assets or non-SRD D&D rulebook text are bundled. Only publish original or appropriately licensed content.
