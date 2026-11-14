@@ -55,3 +55,5 @@ v0.2 includes campaign-scoped species/class/background/feature editors. The map 
 The additive `20261114000300_homebrew_engine.sql` migration creates `homebrew_definitions`, `homebrew_feature_links`, three nullable character reference columns, validation triggers and RLS policies. It does not delete existing characters or campaigns. It must be applied before deploying the v0.2 frontend to avoid missing-table errors.
 
 After applying it, verify the Homebrew Library tab in the app as DM, publish a test species and feature, and check published player access. Do not paste service-role keys into environment variables.
+
+**CVTT production project:** The v0.2 migration was applied through the Supabase integration on 14 November 2026 and was verified. Do **not** execute it again against that project.
