@@ -38,7 +38,7 @@
    - `supabase/migrations/20261114000100_foundations.sql`
    - `supabase/migrations/20261114000200_fix_campaign_owner_visibility.sql`
    - `supabase/migrations/20261114000300_homebrew_engine.sql`
-4. If v0.1 is already installed, apply **only** migration `20261114000300_homebrew_engine.sql`.
+4. **Your existing CVTT Supabase project has already received the v0.2 migration. Do not rerun it.** For any other v0.1 installation, apply only `20261114000300_homebrew_engine.sql` once.
 5. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in Vercel; the new schema adds no environment variables.
 6. Keep schema `private` unexposed in the Data API. Keep Supabase Auth email verification enabled for production.
 
