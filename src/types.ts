@@ -23,8 +23,11 @@ export interface Character {
   max_hp: number
   current_hp: number
   notes: string
+  species_id: string | null
+  class_id: string | null
+  background_id: string | null
   created_at: string
   updated_at: string
 }
-export type CharacterForm = Pick<Character,'name'|'species_name'|'class_name'|'level'|'max_hp'|'current_hp'|'notes'>
-export const newCharacter: CharacterForm = { name: '', species_name: '', class_name: '', level: 1, max_hp: 10, current_hp: 10, notes: '' }
+export type CharacterForm = Pick<Character,'name'|'species_name'|'class_name'|'background_id'|'species_id'|'class_id'|'level'|'max_hp'|'current_hp'|'notes'>
+export const newCharacter: CharacterForm = { name: '', species_name: '', class_name: '', level: 1, max_hp: 10, current_hp: 10, notes: '', species_id: null, class_id: null, background_id: null }
